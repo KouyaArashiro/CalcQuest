@@ -17,3 +17,13 @@ while :; do
       break
    fi
 done
+
+echo "Level: "$level
+echo "Are you ready? (Enter) "
+read REPLY
+seconds=3
+while [ $seconds -gt 0 ]; do
+   echo -ne $seconds
+   sleep 1
+   ((seconds--))
+done
