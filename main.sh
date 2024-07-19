@@ -22,6 +22,19 @@ generate_problem() {
 
 }
 
+get_answer() {
+    local number_of_questions=$(wc -l < questions.dat)
+    echo $number_of_questions
+
+    for i in `seq 1 $number_of_questions` ; do
+#store 1 line
+        head -n $i questions.dat
+        echo -n " = "
+        read -r user_answer
+        echo $user_answer >> user_answer.dat
+    done
+}
+
 echo " Hello, CalcQuest!"
 echo " Please select a level"
 
@@ -44,15 +57,17 @@ generate_problem $level
 
 echo  -n " Are you ready? (Enter) "
 read -r REPLY
-seconds=3
-while [ $seconds -gt 0 ]; do
-   echo -ne "          $seconds\r"
-   sleep 1
-   ((seconds--))
-done
+
+### debug mode
+#seconds=3
+#while [ $seconds -gt 0 ]; do
+#   echo -ne "          $seconds\r"
+#   sleep 1
+#   ((seconds--))
+#done
 
 start_time=$(date +%s)
-#user_answer=get_answer problem
+get_answer
 end_time=$(date +%s)
 
 #scoreing user_answer
