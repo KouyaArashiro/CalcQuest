@@ -3,35 +3,51 @@
 generate_problem() {
     local level=$1
     local number_of_questions=10
-    local num1 num2 operator_num
+    local num1 num2
 
-    operators=(+ - x /)
+    operators=('+' '-' '*' '/')
 
+    > questions.dat
+    > answers.dat
 
-    for i in `seq 1 $number_of_questions` ; do
+    for i in $(seq 1 $number_of_questions) ; do
         case $level in
-           1) num1=$((RANDOM % 10)); num2=$((RANDOM % 10)); operator_num=$((RANDOM % 4)) ;;
-           2) num1=$((RANDOM % 10)); num2=$((RANDOM % 90 + 10)); operator_num=$((RANDOM % 4)) ;;
-           3) num1=$((RANDOM % 90 + 10)); num2=$((RANDOM % 90 + 10)); operator_num=$((RANDOM % 4)) ;;
-           4) num1=$((RANDOM % 90 + 10)); num2=$((RANDOM % 900 + 100)); operator_num=$((RANDOM % 4)) ;;
-           5) num1=$((RANDOM % 900 + 100)); num2=$((RANDOM % 900 + 100)); operator_num=$((RANDOM % 4)) ;;
-
+           1) num1=$((RANDOM % 10)); num2=$((RANDOM % 10));;
+           2) num1=$((RANDOM % 10)); num2=$((RANDOM % 90 + 10));;
+           3) num1=$((RANDOM % 90 + 10)); num2=$((RANDOM % 90 + 10)) ;;
+           4) num1=$((RANDOM % 90 + 10)); num2=$((RANDOM % 900 + 100)) ;;
+           5) num1=$((RANDOM % 900 + 100)); num2=$((RANDOM % 900 + 100)) ;;
         esac
-        echo $num1 ${operators[$operator_num]} $num2 >> questions.dat
-    done
 
+        operators_index=$((RANDOM % 4))
+        operator=${operators[$operators_index]}
+        
+        if [ "$operator" = "/" ] && [ $((num2)) -eq 0 ]; then
+            num2=$((RANDOM % 10 + 1))
+        fi
+
+
+        if [ "$operator" = "*" ]; then
+            echo $num1 '*' $num2 >> questions.dat
+            result=$((num1 * num2))
+            echo $result >> answers.dat
+            continue
+        fi
+        echo $num1 $operator $num2 >> questions.dat
+        echo "$num1 $operator $num2" | bc >> answers.dat
+
+    done
 }
 
 get_answer() {
-    local number_of_questions=$(wc -l < questions.dat)
+    > user_answers.dat
+    local number_of_questions=`wc -l < questions.dat | awk '{print $1}'`
     echo $number_of_questions
 
     for i in `seq 1 $number_of_questions` ; do
-#store 1 line
-        head -n $i questions.dat
-        echo -n " = "
+        echo -n "$(head -n $i questions.dat | tail -n 1) = "
         read -r user_answer
-        echo $user_answer >> user_answer.dat
+        echo $user_answer >> user_answers.dat
     done
 }
 
@@ -70,5 +86,5 @@ start_time=$(date +%s)
 get_answer
 end_time=$(date +%s)
 
-#scoreing user_answer
+#scoreing user_answers
 #show_history
