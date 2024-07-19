@@ -10,16 +10,16 @@ echo "   4: Double-Triple Digits"
 echo "   5: Triple-Triple Digits"
 
 while :; do
-   read -p " Level: " level
-   if (( $level < 1 || $level > 5 )); then
+   read -rp " Level: " level
+   if (( level < 1 || level > 5 )); then
       echo " Please select a level (1/2/3/4/5) "  
    else
       break
    fi
 done
 
-echo " Are you ready? (Enter) "
-read REPLY
+echo  -n " Are you ready? (Enter) "
+read -r REPLY
 seconds=3
 while [ $seconds -gt 0 ]; do
    echo -ne "          $seconds\r"
