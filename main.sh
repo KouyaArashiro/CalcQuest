@@ -82,9 +82,12 @@ read -r REPLY
 #   ((seconds--))
 #done
 
-start_time=$(date +%s)
+start_time=$(date +%s.%N)
 get_answer
-end_time=$(date +%s)
+end_time=$(date +%s.%N)
+
+answer_time=`echo "$end_time - $start_time" | bc -l | xargs printf "%.2f\n"`
+echo " $answer_time seconds"
 
 #scoreing user_answers
 #show_history
