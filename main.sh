@@ -7,8 +7,8 @@ generate_problem() {
 
     operators=('+' '-' '*' '/')
 
-    > questions.dat
-    > answers.dat
+    cp /dev/null questions.dat
+    cp /dev/null answers.dat
 
     for i in $(seq 1 $number_of_questions) ; do
         case $level in
@@ -33,21 +33,21 @@ generate_problem() {
             echo $result >> answers.dat
             continue
         fi
-        echo $num1 $operator $num2 >> questions.dat
+        echo "$num1 $operator $num2" >> questions.dat
         echo "$num1 $operator $num2" | bc >> answers.dat
 
     done
 }
 
 get_answer() {
-    > user_answers.dat
-    local number_of_questions=`wc -l < questions.dat | awk '{print $1}'`
-    echo $number_of_questions
+    cp /dev/null user_answers.dat
+    number_of_questions=$(wc -l < questions.dat | awk '{print $1}')
+    echo "$number_of_questions"
 
-    for i in `seq 1 $number_of_questions` ; do
-        echo -n "$(head -n $i questions.dat | tail -n 1) = "
+    for i in $(seq 1 "$number_of_questions") ; do
+        echo -n "$(head -n "$i" questions.dat | tail -n 1) = "
         read -r user_answer
-        echo $user_answer >> user_answers.dat
+        echo "$user_answer" >> user_answers.dat
     done
 }
 
@@ -69,7 +69,7 @@ while :; do
    fi
 done
 
-generate_problem $level
+generate_problem "$level"
 
 echo  -n " Are you ready? (Enter) "
 read -r REPLY
@@ -86,7 +86,7 @@ start_time=$(date +%s.%N)
 get_answer
 end_time=$(date +%s.%N)
 
-answer_time=`echo "$end_time - $start_time" | bc -l | xargs printf "%.2f\n"`
+answer_time=$(echo "$end_time - $start_time" | bc -l | xargs printf "%.2f\n")
 echo " $answer_time seconds"
 
 #scoreing user_answers
