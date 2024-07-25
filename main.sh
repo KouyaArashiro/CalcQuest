@@ -45,7 +45,7 @@ get_answer() {
     echo "$number_of_questions"
 
     for i in $(seq 1 "$number_of_questions") ; do
-        echo -n "$(head -n "$i" questions.dat | tail -n 1) = "
+        echo -n "    $(head -n "$i" questions.dat | tail -n 1) = "
         read -r user_answer
         echo "$user_answer" >> user_answers.dat
     done
@@ -88,6 +88,8 @@ end_time=$(date +%s.%N)
 
 answer_time=$(echo "$end_time - $start_time" | bc -l | xargs printf "%.2f\n")
 echo " $answer_time seconds"
+echo "$answer_time $(date +'%Y/%m/%d %H:%M:%S')" >> history.dat
+sort -g -k 1 history.dat > history.tmp && cat history.tmp > history.dat && rm -f history.tmp
 
 #scoreing user_answers
 #show_history
