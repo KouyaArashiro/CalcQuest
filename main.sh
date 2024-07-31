@@ -132,8 +132,8 @@ scorering_user_answers() {
 		    echo " Your score: $score Soso.."
 		fi 
 
-        echo "$score $answer_time $(date +'%Y/%m/%d %H:%M:%S')" >> history.dat
-        sort -k 1,1nr -k 2,2n history.dat > history.tmp && head -n 10 history.tmp > history.dat && rm -f history.tmp
+        echo "$score $answer_time $(date +'%Y/%m/%d %H:%M:%S')" >> ranking.dat
+        sort -k 1,1nr -k 2,2n ranking.dat > ranking.tmp && head -n 10 ranking.tmp > ranking.dat && rm -f ranking.tmp
 }
 
 echo " Hello, CalcQuest!"
@@ -144,13 +144,17 @@ echo "   2: Single-Double Digits"
 echo "   3: Double-Double Digits"
 echo "   4: Double-Triple Digits"
 echo "   5: Triple-Triple Digits"
+echo "   6: Show your ranking"
 
 while :; do
    read -rp " Level: " level
-   if (( level < 1 || level > 5 )); then
-      echo " Please select a level (1/2/3/4/5) "  
-   else
-      break
+   if (( $level < 1  ||  $level > 6 )); then
+      echo " Please select a level (1/2/3/4/5/6) "  
+   elif [ $level -eq 6 ]; then
+       nl ranking.dat
+       exit
+    else
+        break
    fi
 done
 
@@ -174,5 +178,3 @@ end_time=$(date +%s.%N)
 answer_time=$(echo "$end_time - $start_time" | bc -l | xargs printf "%.2f\n")
 echo " $answer_time seconds"
 scorering_user_answers "$level" "$answer_time"
-
-#show_history
