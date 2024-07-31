@@ -76,16 +76,19 @@ scorering_user_answers() {
 	factors=(0.8 0.6 0.4)
 	case $level in
 		1) if [ $(echo "$answer_time < 10" | bc) ]; then
-			   return
+			   :
 		   elif [ $(echo "$answer_time < 20" | bc) ]; then
 			   ((score*=${factors[0]}))
+		       echo "$score ${factors[0]}"
 		   elif [ $(echo "$answer_time < 30" | bc) ]; then
 			   ((score*=${factors[1]}))
+		       echo "$score ${factors[0]}"
 		   else
 			   ((score*=${factors[2]}))
+		       echo "$score ${factors[0]}"
 		   fi ;;
 		2) if [ $(echo "$answer_time < 20" | bc) ]; then
-			   return
+			   :
 		   elif [ $(echo "$answer_time < 40" | bc) ]; then
 			   ((score*=${factors[0]}))
 		   elif [ $(echo "$answer_time < 60" | bc) ]; then
@@ -94,7 +97,7 @@ scorering_user_answers() {
 			   ((score*=${factors[2]}))
 		   fi ;;
 		3) if [ $(echo "$answer_time < 30" | bc) ]; then
-			   return
+			   :
 		   elif [ $(echo "$answer_time < 50" | bc) ]; then
 			   ((score*=${factors[0]}))
 		   elif [ $(echo "$answer_time < 70" | bc) ]; then
@@ -103,7 +106,7 @@ scorering_user_answers() {
 			   ((score*=${factors[2]}))
 		   fi ;;
 		4) if [ $(echo "$answer_time < 50" | bc) ]; then
-			   return
+			   :
 		   elif [ $(echo "$answer_time < 70" | bc) ]; then
 			   ((score*=${factors[0]}))
 		   elif [ $(echo "$answer_time < 90" | bc) ]; then
@@ -112,7 +115,7 @@ scorering_user_answers() {
 			   ((score*=${factors[2]}))
 		   fi ;;
 		5) if [ $(echo "$answer_time < 70" | bc) ]; then
-			   return
+			   :
 		   elif [ $(echo "$answer_time < 90" | bc) ]; then
 			   ((score*=${factors[0]}))
 		   elif [ $(echo "$answer_time < 110" | bc) ]; then
@@ -122,7 +125,9 @@ scorering_user_answers() {
 		   fi ;;
 		esac
 
-		if [ $score -eq 100 ]; then
+		echo $score
+
+		if [ $(echo "$score < 100" | bc) ]; then
 		    echo " Your score: $score Congratulations!!!"
 		elif [ $(echo "$score < 80" | bc) ]; then
 		    echo " Your score: $score Super!!"
