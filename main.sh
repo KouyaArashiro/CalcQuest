@@ -1,8 +1,9 @@
 #! /bin/bash
+    
+NUMBER_OF_QUESTIONS=10
 
 generate_problem() {
     local level=$1
-    local number_of_questions=10
     local num1 num2
 
     operators=('+' '-' '*' '/')
@@ -10,7 +11,7 @@ generate_problem() {
     cp /dev/null questions.dat
     cp /dev/null answers.dat
 
-    for i in $(seq 1 $number_of_questions) ; do
+    for i in $(seq 1 $NUMBER_OF_QUESTIONS) ; do
         case $level in
            1) num1=$((RANDOM % 10)); num2=$((RANDOM % 10));;
            2) num1=$((RANDOM % 10)); num2=$((RANDOM % 90 + 10));;
@@ -41,14 +42,98 @@ generate_problem() {
 
 get_answer() {
     cp /dev/null user_answers.dat
-    number_of_questions=$(wc -l < questions.dat | awk '{print $1}')
-    echo "$number_of_questions"
 
-    for i in $(seq 1 "$number_of_questions") ; do
+    for i in $(seq 1 "$NUMBER_OF_QUESTIONS") ; do
         echo -n "    $(head -n "$i" questions.dat | tail -n 1) = "
         read -r user_answer
+		while :; do
+			integer_regex='^-?[0-9]+$'
+			float_regex='^-?[0-9]*\.[0-9]+$'
+		   if [[ $user_answer =~ $integer_regex || $user_answer =~ $float_regex ]]; then
+		       break
+		    else
+                echo -n "    $(head -n "$i" questions.dat | tail -n 1) = "
+				read -r user_answer
+			fi
+		done
         echo "$user_answer" >> user_answers.dat
     done
+}
+
+scorering_user_answers() {
+    score=0
+	level=${1}
+	answer_time=${2}
+
+    for i in $(seq 1 "$NUMBER_OF_QUESTIONS") ; do 
+        correct=$(head -n "$i" answers.dat | tail -n 1)
+        user_answer=$(head -n "$i" user_answers.dat | tail -n 1)
+        if [ "$correct" == "$user_answer" ]; then
+            ((score+=10))
+        fi
+	done
+
+	factors=(0.8 0.6 0.4)
+	case $level in
+		1) if [ $(echo "$answer_time < 10" | bc) -eq 1 ]&& [ $score -eq 100 ]; then
+			   :
+		   elif [ $(echo "$answer_time < 20" | bc) -eq 1 ]; then
+			   score=$(echo "$score*${factors[0]}" | bc )
+		   elif [ $(echo "$answer_time < 30" | bc) -eq 1 ]; then
+			   score=$(echo "$score*${factors[1]}" | bc )
+		   else
+			   score=$(echo "$score*${factors[2]}" | bc )
+		   fi ;;
+		2) if [ $(echo "$answer_time < 20" | bc) -eq 1 ]; then
+			   :
+		   elif [ $(echo "$answer_time < 40" | bc) -eq 1 ]; then
+			   ((score*=${factors[0]}))
+		   elif [ $(echo "$answer_time < 60" | bc) -eq 1 ]; then
+			   ((score*=${factors[1]}))
+		   else
+			   ((score*=${factors[2]}))
+		   fi ;;
+		3) if [ $(echo "$answer_time < 30" | bc) -eq 1 ]; then
+			   :
+		   elif [ $(echo "$answer_time < 50" | bc) -eq 1 ]; then
+			   ((score*=${factors[0]}))
+		   elif [ $(echo "$answer_time < 70" | bc) -eq 1 ]; then
+			   ((score*=${factors[1]}))
+		   else
+			   ((score*=${factors[2]}))
+		   fi ;;
+		4) if [ $(echo "$answer_time < 50" | bc) -eq 1 ]; then
+			   :
+		   elif [ $(echo "$answer_time < 70" | bc) -eq 1 ]; then
+			   ((score*=${factors[0]}))
+		   elif [ $(echo "$answer_time < 90" | bc) -eq 1 ]; then
+			   ((score*=${factors[1]}))
+		   else
+			   ((score*=${factors[2]}))
+		   fi ;;
+		5) if [ $(echo "$answer_time < 70" | bc) -eq 1 ]; then
+			   :
+		   elif [ $(echo "$answer_time < 90" | bc) -eq 1 ]; then
+			   ((score*=${factors[0]}))
+		   elif [ $(echo "$answer_time < 110" | bc) -eq 1 ]; then
+			   ((score*=${factors[1]}))
+		   else
+			   ((score*=${factors[2]}))
+		   fi ;;
+		esac
+
+		if [ $(echo "$score == 100" | bc) -eq 1 ]; then
+		    echo " Your score: $score Congratulations!!!"
+		elif [ $(echo "$score > 80" | bc) -eq 1 ]; then
+		    echo " Your score: $score Super!!"
+		elif [ $(echo "$score > 60" | bc ) -eq 1 ]; then
+		    echo " Your score: $score Good!"
+		else
+		    echo " Your score: $score Soso.."
+		fi 
+
+        echo "$score $answer_time $(date +'%Y/%m/%d %H:%M:%S')" >> ranking.dat
+        sort -k 1,1nr -k 2,2n ranking.dat > ranking.tmp && head -n 10 ranking.tmp > ranking.dat && rm -f ranking.tmp
 }
 
 echo " Hello, CalcQuest!"
@@ -59,13 +144,17 @@ echo "   2: Single-Double Digits"
 echo "   3: Double-Double Digits"
 echo "   4: Double-Triple Digits"
 echo "   5: Triple-Triple Digits"
+echo "   6: Show your ranking"
 
 while :; do
    read -rp " Level: " level
-   if (( level < 1 || level > 5 )); then
-      echo " Please select a level (1/2/3/4/5) "  
-   else
-      break
+   if (( $level < 1  ||  $level > 6 )); then
+      echo " Please select a level (1/2/3/4/5/6) "  
+   elif [ $level -eq 6 ]; then
+       nl ranking.dat
+       exit
+    else
+        break
    fi
 done
 
@@ -88,8 +177,4 @@ end_time=$(date +%s.%N)
 
 answer_time=$(echo "$end_time - $start_time" | bc -l | xargs printf "%.2f\n")
 echo " $answer_time seconds"
-echo "$answer_time $(date +'%Y/%m/%d %H:%M:%S')" >> history.dat
-sort -g -k 1 history.dat > history.tmp && cat history.tmp > history.dat && rm -f history.tmp
-
-#scoreing user_answers
-#show_history
+scorering_user_answers "$level" "$answer_time"
