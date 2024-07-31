@@ -131,6 +131,9 @@ scorering_user_answers() {
 		else
 		    echo " Your score: $score Soso.."
 		fi 
+
+        echo "$score $answer_time $(date +'%Y/%m/%d %H:%M:%S')" >> history.dat
+        sort -k 1,1nr -k 2,2n history.dat > history.tmp && head -n 10 history.tmp > history.dat && rm -f history.tmp
 }
 
 echo " Hello, CalcQuest!"
@@ -170,8 +173,6 @@ end_time=$(date +%s.%N)
 
 answer_time=$(echo "$end_time - $start_time" | bc -l | xargs printf "%.2f\n")
 echo " $answer_time seconds"
-echo "$answer_time $(date +'%Y/%m/%d %H:%M:%S')" >> history.dat
-sort -g -k 1 history.dat > history.tmp && head -n 10 history.tmp > history.dat && rm -f history.tmp
-
 scorering_user_answers "$level" "$answer_time"
+
 #show_history
